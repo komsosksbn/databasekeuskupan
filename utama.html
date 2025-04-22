@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Keuskupan Santo Benediktus Nusantara</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="Logo Keuskupan Santo Benediktus Nusantara" style="width: 100px; height: auto; margin-right: 20px;" />
+    <h1>Keuskupan Santo Benediktus Nusantara</h1>
+    <nav>
+      <ul>
+        <li><a href="#daftar-jabatan">Daftar Jabatan</a></li>
+        <li><a href="#keuangan">Keuangan</a></li>
+        <li><a href="#jadwal-misa">Jadwal Misa</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Daftar Jabatan Gerejawi -->
+    <section id="daftar-jabatan">
+        <h2>Daftar Jabatan Gerejawi</h2>
+        <form onsubmit="tambahJabatan(event)">
+          <input type="text" id="input-nama" placeholder="Nama Lengkap" required />
+          <input type="text" id="input-jabatan" placeholder="Jabatan (contoh: Uskup)" required />
+          <button type="submit">Tambah</button>
+        </form>
+        <ul id="list-jabatan"></ul>
+    </section>      
+    
+    <!-- Manajemen Keuangan -->
+    <section id="keuangan">
+      <h2>Keuangan Keuskupan</h2>
+      <form onsubmit="hitungKeuangan(event)">
+        <input type="number" id="pemasukan" placeholder="Pemasukan (Rp)" />
+        <input type="number" id="pengeluaran" placeholder="Pengeluaran (Rp)" />
+        <button type="submit">Hitung</button>
+      </form>
+      <p id="hasil-keuangan"></p>
+    </section>
+
+    <!-- Penjadwalan Misa -->
+    <section id="jadwal-misa">
+      <h2>Jadwal Misa Otomatis</h2>
+      <form onsubmit="buatJadwal(event)">
+        <input type="text" id="hari-misa" placeholder="Hari (Contoh: Minggu)" required />
+        <input type="time" id="jam-misa" required />
+        <button type="submit">Buat Jadwal</button>
+      </form>
+      <ul id="daftar-jadwal"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Keuskupan Santo Benediktus Nusantara</p>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const jabatanTersimpan = JSON.parse(localStorage.getItem("jabatanList")) || [];
+        jabatanTersimpan.forEach(item => {
+        tampilkanJabatan(item.nama, item.jabatan);
+        });
+    });
+
+    function tambahJabatan(event) {
+        event.preventDefault();
+        const namaInput = document.getElementById("input-nama");
+        const jabatanInput = document.getElementById("input-jabatan");
+
+        const nama = namaInput.value.trim();
+        const jabatan = jabatanInput.value.trim();
+
+        if (nama && jabatan) {
+        tampilkanJabatan(nama, jabatan);
+        simpanJabatan(nama, jabatan);
+        namaInput.value = "";
+        jabatanInput.value = "";
+        }
+    }
+
+    function tampilkanJabatan(nama, jabatan) {
+        const li = document.createElement("li");
+        li.textContent = `${nama} - ${jabatan}`;
+
+        const btnHapus = document.createElement("button");
+        btnHapus.textContent = "Hapus";
+        btnHapus.style.marginLeft = "10px";
+        btnHapus.onclick = () => {
+        li.remove();
+        hapusJabatan(nama, jabatan);
+        };
+
+        li.appendChild(btnHapus);
+        document.getElementById("list-jabatan").appendChild(li);
+    }
+
+    function simpanJabatan(nama, jabatan) {
+        const daftar = JSON.parse(localStorage.getItem("jabatanList")) || [];
+        daftar.push({ nama, jabatan });
+        localStorage.setItem("jabatanList", JSON.stringify(daftar));
+    }
+
+    function hapusJabatan(nama, jabatan) {
+        const daftar = JSON.parse(localStorage.getItem("jabatanList")) || [];
+        const baru = daftar.filter(item => item.nama !== nama || item.jabatan !== jabatan);
+        localStorage.setItem("jabatanList", JSON.stringify(baru));
+    }
+
+    function hitungKeuangan(event) {
+      event.preventDefault();
+      const pemasukan = parseInt(document.getElementById("pemasukan").value) || 0;
+      const pengeluaran = parseInt(document.getElementById("pengeluaran").value) || 0;
+      const hasil = pemasukan - pengeluaran;
+      document.getElementById("hasil-keuangan").textContent = `Saldo saat ini: Rp ${hasil.toLocaleString()}`;
+    }
+
+    function buatJadwal(event) {
+      event.preventDefault();
+      const hari = document.getElementById("hari-misa").value;
+      const jam = document.getElementById("jam-misa").value;
+      const jamInt = parseInt(jam.split(":")[0]);
+      
+      if (jamInt >= 16 && jamInt <= 20) {
+        const item = document.createElement("li");
+        item.textContent = `${hari}, pukul ${jam}`;
+
+        const btnHapus = document.createElement("button");
+        btnHapus.textContent = "Hapus";
+        btnHapus.style.marginLeft = "10px";
+        btnHapus.onclick = () => {
+          item.remove();
+        };
+
+        item.appendChild(btnHapus);
+        document.getElementById("daftar-jadwal").appendChild(item);
+      } else {
+        alert("Jam misa hanya antara jam 16:00 hingga 20:00.");
+      }
+    }
+  </script>
+</body>
+</html>
